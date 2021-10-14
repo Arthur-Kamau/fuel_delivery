@@ -9,24 +9,24 @@
             <div class="border-end bg-white" id="sidebar-wrapper">
 
                 <div class="list-group list-group-flush">
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/">Home</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/home">Home</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3"
                        href="{{ route('create') }}">
                         {{ __('Create') }}
                     </a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/sort/price">Sort
-                        by Prices</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/sort/location">Sort by
-                        location</a>
+                        by Prices&nbsp;<small>(per liter)</small></a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/sort/location">Sort
+                        by
+                        location&nbsp;<small>(names)</small></a>
                     <div class="list-group-item list-group-item-action list-group-item-light p-3">
                         Sort by type
                         <ul class="mt-4 ml-5 list-group">
-                            <li ><a href="{{route('type_list', ['type' => 'diesel'])}}">diesel</a></li>
+                            <li><a href="{{route('type_list', ['type' => 'diesel'])}}">diesel</a></li>
                             <li><a href="{{route('type_list', ['type' => 'petrol'])}}">petrol</a></li>
 
                         </ul>
                     </div>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/general">Categories</a>
 
                 </div>
             </div>
@@ -68,12 +68,24 @@
 
                                         <?php  $pos = 1?>
                                         @foreach ($lists as $item)
+                                            <input type="hidden" id="lat-{{$loop->index}}" value="{{ $item->latitude}}">
+                                            <input type="hidden" id="long-{{$loop->index}}"
+                                                   value="{{ $item->longitude}}">
+                                            <input type="hidden" id="dlvry-{{$loop->index}}"
+                                                   value="{{ $item->longitude}}"/>
                                             <tr>
                                                 <td scope="row"> {{ $loop->index +1}}</td>
                                                 <td>{{$item->location}}</td>
-                                                <td>{{$item->type}}</td>
+                                                <td>
+
+                                                @if( $item->type == 'unleaded_premium_super')
+                                                    unleaded premium super
+                                                    @else
+                                                        {{$item->type}}
+                                                    @endif
+                                                </td>
                                                 <td>{{$item->price}}</td>
-                                                <td >{{$item->delivery_cost}}          </td>
+                                                <td>{{$item->delivery_cost}}          </td>
 
                                                 <td id="distance-{{ $loop->index }}"></td>
                                                 <td id="cost-{{ $loop->index }}"></td>
@@ -90,7 +102,7 @@
                         // start of execution
 
                         function roundToTwo(num) {
-                            return +(Math.round(num + "e+2")  + "e-2");
+                            return +(Math.round(num + "e+2") + "e-2");
                         }
 
 
@@ -99,26 +111,28 @@
                             let itemsCount = {{count($lists)}};
 
                             for (let i = 0; i < itemsCount; i++) {
-                                console.log("item number" + i)
-                                let lat = {{ $item->latitude}};
-                                let long = {{ $item->longitude}};
+
+
+                                const cstPerKm = document.getElementById("dlvry-" + i).value;
+                                const lat = document.getElementById("lat-" + i).value;
+                                const long = document.getElementById("long-" + i).value;
+                                console.log("item number" + i + " item lat " + lat + " long  " + long)
+
                                 const r = haversine(lat, long, longitude, latitude);
                                 const ele = document.getElementById("distance-" + i);
                                 const ele2 = document.getElementById("cost-" + i);
                                 if (ele != undefined) {
 
 
-
-                                    ele.innerText =roundToTwo( r/1000).toString();
+                                    ele.innerText = roundToTwo(r / 1000).toString();
                                 } else {
                                     console.error("Element distance-" + i + "  is undefined")
                                 }
 
                                 if (ele2 != undefined) {
 
-                                    const cstPerKm = {{$item->delivery_cost}};
-                                    ele2.innerText = roundToTwo(r*cstPerKm/1000).toString();
-                                }else{
+                                    ele2.innerText = roundToTwo(r * cstPerKm / 1000).toString();
+                                } else {
                                     console.error("Element distance and cost-" + i + "  is undefined")
                                 }
 

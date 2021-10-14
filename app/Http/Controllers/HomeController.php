@@ -34,7 +34,7 @@ class HomeController extends Controller
      */
     public function sortByPrice()
     {
-        $list = DB::table('gas_list')->get();
+        $list = DB::table('gas_list')->orderBy('price')->get();
         return view('home', ['lists'=> $list]);
     }
 
@@ -46,7 +46,7 @@ class HomeController extends Controller
      */
     public function sortByLocation()
     {
-        $list = DB::table('gas_list')->get();
+        $list = DB::table('gas_list')->orderBy('location')->get();
         return view('home', ['lists'=> $list]);
     }
 
@@ -56,11 +56,10 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function sortByType(Request $request)
+    public function sortByType($type)
     {
-        $type = $request->input('type');
         $list = DB::table('gas_list')->where('type', $type)->get();
-        return view('home', ['lists'=> $list]);
+        return view('type', ['lists'=> $list, 'type'=>$type]);
     }
 
 
@@ -71,8 +70,6 @@ class HomeController extends Controller
      */
     public function create()
     {
-
-
         return view('create');
     }
 
